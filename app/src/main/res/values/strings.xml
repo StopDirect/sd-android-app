@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">StopDirect</string>
+    <string name="app_info">App-Info</string>
+    <string name="app_info_text">Diese App entstand als Alternative zur WebApp <b><a href="https://stop.direct">stop.direct</a></b>, um ein App-Icon für den Homescreen bereit zu stellen.
+    "\n\n"Sobald Du die App startest, ermittelt sie Deinen Standort, die nächstgelegene Haltestelle und öffnet die Abfahrtstafel.
+    "\n\n"Du musst nichts eintippen, einfach die App starten und einen Moment warten.
+    "\n\n"Die Basis der App ist eine vom Alexey Valikov entwickelte Anwendung, die die Haltestellen aller Verkehrsverbünde in Deutschland bündelt und die dazugehörigen Abfahrtstafel-Urls bereitstellt.
+    "\n\n"Es sind <b>noch</b> nicht alle Verkehrsverbünde eingebunden.
+    "\n\n"Also habt bitte ein wenig Geduld, wenn Euer Verkehrsverbund noch nicht dabei ist. Erweiterung folgt.
+    "\n\n"Die Android-App wird später sicher noch angereichert mit weiteren Features.
+    "\n\n"App-Entwicklung: <b>  - <a href="http://www.gaby-becker.de">Gaby Becker</a></b>
+    "\n"Basis-Anwendung: <b>- <a href="https://github.com/highsource/stop.direct">Alexey Valikov</a></b>
+    "\n"Logo-Entwicklung: <b>- <a href="https://www.twitter.com/tursics">Thomas Tursics</a></b>
+    "\n\n"Für die App wird ein <a href="https://design.google.com/icons/">Material-Design-Icon von Google</a> genutzt, welches unter Apache License Version 2.0. zur Verfügung steht.
+    "\n\n"Alexey hat auf seinem <b>- <a href="https://github.com/highsource/stop.direct">hier</a></b> verlinkten Github-Account die Lizenz für seine Basis-Anwendung ausführlich beschrieben.
+    "\n\n"Die Bahnhofsdaten wurden von der Deutschen Bahn im Rahmen des dortigen <b><a href="http://data.deutschebahn.com/pages/nutzungsbedingungen">OpenData-Projektes</a></b> zur Verfügung gestellt.
+    </string>
+    <string name="app_info_title">Informationen zur App</string>
+    <string name="app_info_ok">OK</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_info">App-Info</string>
+    <string name="app_info_text">Diese App wurde ...</string>
+    <string name="app_info_title">Informationen zur App</string>
+    <string name="app_info_ok">OK</string>
+</resources>
