@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">StopDirect</string>
+    <string name="app_name">stop.direct</string>
     <string name="app_info">App-Info</string>
     <string name="app_info_text">Diese App entstand als Alternative zur WebApp <b><a href="https://stop.direct">stop.direct</a></b>, um ein App-Icon für den Homescreen bereit zu stellen.
     "\n\n"Sobald Du die App startest, ermittelt sie Deinen Standort, die nächstgelegene Haltestelle und öffnet die Abfahrtstafel.
@@ -17,4 +17,6 @@
     </string>
     <string name="app_info_title">Informationen zur App</string>
     <string name="app_info_ok">OK</string>
+    <string name="no_location_detected">Es konnte kein Standort ermittelt werden. Bitte die App neu starten.</string>
+    <string name="no_location_access">Du musst die Standortbestimmung freigeben, damit diese App funktioniert.</string>
 </resources>

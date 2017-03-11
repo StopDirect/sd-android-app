@@ -4,4 +4,6 @@
     <string name="app_info_text">Diese App wurde ...</string>
     <string name="app_info_title">Informationen zur App</string>
     <string name="app_info_ok">OK</string>
+    <string name="no_location_detected">Es konnte kein Standort ermittelt werden. Bitte die App neu starten.</string>
+    <string name="no_location_access">Du musst die Standortbestimmung freigeben, damit diese App funktioniert.</string>
 </resources>

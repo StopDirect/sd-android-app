@@ -15,6 +15,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PersistableBundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -41,111 +42,61 @@ import android.widget.Toast;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
-public class MainActivity extends AppCompatActivity {
+import static android.R.attr.path;
+import static android.text.style.TtsSpan.ARG_PATH;
+
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private static final int PERMISSION_REQUEST_CODE = 200;
     private static final String TAG =MainActivity.class.getSimpleName();
     private static final String DIALOG_TAG = "App Info Dialog";
-
-
-    /**
-     * WebViewClient subclass loads all hyperlinks in the existing WebView
-     */
-    public class GeoWebViewClient extends WebViewClient {
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            // When user clicks a hyperlink, load in the existing WebView
-            view.loadUrl(url);
-            return false;
-        }
-
-    }
-
-    /**
-     * WebChromeClient subclass handles UI-related calls
-     * Note: think chrome as in decoration, not the Chrome browser
-     */
-    public class GeoWebChromeClient extends WebChromeClient {
-        @Override
-        public void onGeolocationPermissionsShowPrompt(String origin,
-                                                       GeolocationPermissions.Callback callback) {
-            // Always grant permission since the app itself requires location
-            // permission and the user has therefore already granted it
-            //callback.invoke(origin, true, false);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    // Check Permissions Now
-
-
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                            android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                        showMessageOKCancel("You need to allow access to Locations",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        ActivityCompat.requestPermissions(MainActivity.this,
-                                                new String[] {android.Manifest.permission.ACCESS_FINE_LOCATION},
-                                                PERMISSION_REQUEST_CODE);
-                                    }
-                                });
-                    } else {
-                        ActivityCompat.requestPermissions(
-                                MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                PERMISSION_REQUEST_CODE);
-
-                    }
-
-                }
-            }
-            callback.invoke(origin, true, false);
-
-        }
-
-
-        private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
-            new AlertDialog.Builder(MainActivity.this)
-                    .setMessage(message)
-                    .setPositiveButton("OK", okListener)
-                    .setNegativeButton("Cancel", null)
-                    .create()
-                    .show();
-        }
-
-
-    }
-
+    private String url;
+    private double mLongitude;
+    private double mLatitude;
     private WebView mWebView;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
+
 
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         mWebView = (WebView) findViewById(R.id.webView1);
 
+        mWebView.setWebChromeClient(new WebChromeClient());
         WebSettings settings = mWebView.getSettings();
-        settings.setDomStorageEnabled(true);
-        // Brower niceties -- pinch / zoom, follow links in place
         mWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         mWebView.getSettings().setBuiltInZoomControls(true);
-        mWebView.setWebViewClient(new GeoWebViewClient());
         mWebView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
         mWebView.getSettings().setLoadWithOverviewMode(true);
         mWebView.getSettings().setUseWideViewPort(true);
-        // Below required for geolocation
         mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.getSettings().setDomStorageEnabled(true);
 
-        mWebView.getSettings().setGeolocationEnabled(true);
-        mWebView.setWebChromeClient(new GeoWebChromeClient());
-
-        mWebView.loadUrl("https://stop.direct/");
+        buildGoogleApiClient();
 
     }
+
+
+    /**
+     * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
+     */
+    private synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -170,9 +121,143 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Runs when a GoogleApiClient object successfully connects.
+     */
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        // Provides a simple way of getting a device's location and is well suited for
+        // applications that do not require a fine-grained location and that do not need location
+        // updates. Gets the best and most recent location currently available, which may be null
+        // in rare cases when a location is not available.
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Check Permissions Now
+
+
+                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    showMessageOKCancel("You need to allow access to Locations",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ActivityCompat.requestPermissions(MainActivity.this,
+                                            new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                                            PERMISSION_REQUEST_CODE);
+                                }
+
+                            });
+                } else {
+                    ActivityCompat.requestPermissions(
+                            MainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                            PERMISSION_REQUEST_CODE);
+
+                    mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                    showWebView();
+                }
+            }else {
+                mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                showWebView();
+            }
+        }else{
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            showWebView();
+        }
+    }
+
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+
+
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        // Refer to the javadoc for ConnectionResult to see what error codes might be returned in
+        // onConnectionFailed.
+        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
+    }
+
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        // The connection to Google Play services was lost for some reason. We call connect() to
+        // attempt to re-establish the connection.
+        Log.i(TAG, "Connection suspended");
+        mGoogleApiClient.connect();
+    }
+
     @Override
     public void onBackPressed() {
         finish();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "App gestartet");
+        if (!mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "App gestopt");
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.connect();
+        }
+
+        Log.d(TAG, "App resumt");
+
+    }
+
+    private void showWebView() {
+        if (mLastLocation != null) {
+            mLatitude = mLastLocation.getLatitude();
+            Log.d(TAG, "Latitude hat den Wert: " + mLatitude);
+            mLongitude = mLastLocation.getLongitude();
+            Log.d(TAG, "Longitude hat den Wert: " + mLongitude);
+            url = "https://stop.direct/?lon=" + mLongitude + "&lat=" + mLatitude;
+            Log.d(TAG, "Die url lautet: " + url);
+
+            mWebView.loadUrl(url);
+
+        } else {
+            Toast.makeText(this, R.string.no_location_detected, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (!mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.connect();
+        }
+        Log.d(TAG, "App gerestartet");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "App macht Pause");
     }
 
 
